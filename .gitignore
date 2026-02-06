@@ -16,5 +16,7 @@ __pycache__/
 *.vscode/
 *.coverage
 *.gif
+.venv/
+*.ipynb_checkpoints/
+.ipynb_checkpoints/
 *.pdf
-。venv/
