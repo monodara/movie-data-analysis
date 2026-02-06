@@ -50,6 +50,14 @@ app.title = "Movie Data Analysis Dashboard"
 app.layout = html.Div([
     html.H1("Interactive Movie Data Analysis", style={'textAlign': 'center'}),
 
+    # -- KPIs --
+    html.Div([
+        html.Div(id='kpi-total-movies', className="three columns", style={'textAlign': 'center', 'padding': '10px', 'border': '1px solid #ddd', 'margin': '5px'}),
+        html.Div(id='kpi-total-revenue', className="three columns", style={'textAlign': 'center', 'padding': '10px', 'border': '1px solid #ddd', 'margin': '5px'}),
+        html.Div(id='kpi-total-profit', className="three columns", style={'textAlign': 'center', 'padding': '10px', 'border': '1px solid #ddd', 'margin': '5px'}),
+        html.Div(id='kpi-avg-roi', className="three columns", style={'textAlign': 'center', 'padding': '10px', 'border': '1px solid #ddd', 'margin': '5px'}),
+    ], className="row", style={'marginBottom': '20px'}),
+
     # -- Filters --
     html.Div([
         html.Div([
@@ -101,6 +109,12 @@ app.layout = html.Div([
             dcc.Graph(id='country-choropleth')
         ], className="six columns"),
     ], className="row"),
+    
+    html.Div([
+        html.Div([
+            dcc.Graph(id='hit-flop-pie')
+        ], className="six columns"),
+    ], className="row"),
 ])
 
 # --- Callback Functions for Interactivity ---
@@ -108,7 +122,12 @@ app.layout = html.Div([
     [Output('revenue-vote-scatter', 'figure'),
      Output('profit-bar-chart', 'figure'),
      Output('genre-sunburst', 'figure'),
-     Output('country-choropleth', 'figure')],
+     Output('country-choropleth', 'figure'),
+     Output('hit-flop-pie', 'figure'),
+     Output('kpi-total-movies', 'children'),
+     Output('kpi-total-revenue', 'children'),
+     Output('kpi-total-profit', 'children'),
+     Output('kpi-avg-roi', 'children')],
     [Input('year-slider', 'value'),
      Input('genre-dropdown', 'value'),
      Input('country-dropdown', 'value')]
@@ -126,12 +145,25 @@ def update_charts(year_range, selected_genre, selected_country):
     if selected_country != 'all':
         filtered_df = filtered_df[filtered_df['country_list'].apply(lambda x: selected_country in x)]
 
+    # --- Calculate KPIs ---
+    total_movies = len(filtered_df)
+    total_revenue = filtered_df['revenue'].sum()
+    total_profit = filtered_df['profit'].sum()
+    avg_roi = filtered_df['profitability_ratio'].mean()
+
+    kpi_total_movies_layout = [html.H4("Total Movies"), html.H5(f"{total_movies:,}")]
+    kpi_total_revenue_layout = [html.H4("Total Revenue"), html.H5(f"${total_revenue:,.0f}")]
+    kpi_total_profit_layout = [html.H4("Total Profit"), html.H5(f"${total_profit:,.0f}")]
+    kpi_avg_roi_layout = [html.H4("Average ROI"), html.H5(f"{avg_roi:.2f}x")]
+
+
     # Chart 1: Revenue vs. Vote Average Scatter Plot
     scatter_fig = px.scatter(
         filtered_df,
         x='revenue',
         y='vote_average',
         hover_name='original_title',
+        hover_data=['release_year', 'profitability_ratio', 'genres'],
         color='verdict',
         color_discrete_map={'Hit': 'green', 'Flop': 'red'},
         title='Revenue vs. Vote Average'
@@ -173,8 +205,18 @@ def update_charts(year_range, selected_genre, selected_country):
     )
     choropleth_fig.update_layout(transition_duration=500)
 
+    # Chart 5: Hit vs. Flop Pie Chart
+    verdict_counts = filtered_df['verdict'].value_counts()
+    pie_fig = px.pie(
+        values=verdict_counts.values,
+        names=verdict_counts.index,
+        title='Hit vs. Flop Distribution',
+        color_discrete_sequence=px.colors.sequential.RdBu
+    )
+    pie_fig.update_layout(transition_duration=500)
 
-    return scatter_fig, bar_fig, sunburst_fig, choropleth_fig
+
+    return scatter_fig, bar_fig, sunburst_fig, choropleth_fig, pie_fig, kpi_total_movies_layout, kpi_total_revenue_layout, kpi_total_profit_layout, kpi_avg_roi_layout
 
 # --- Run the App ---
 if __name__ == '__main__':
