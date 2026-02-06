@@ -17,3 +17,4 @@ __pycache__/
 *.coverage
 *.gif
 *.pdf
+。venv/

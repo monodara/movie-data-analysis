@@ -3,6 +3,7 @@ import logging
 import matplotlib.pyplot as plt
 from copy import deepcopy
 from fpdf import FPDF
+import ast
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -56,7 +57,7 @@ def analyze_movie_data(input_file):
     # Chart 3: Genre distribution pie chart
     all_genres = set()
     for item in df['genres']:
-        genres = eval(item)
+        genres = ast.literal_eval(item)
         for g in genres:
             all_genres.add(g['name'])
     all_genres = list(all_genres)
@@ -90,7 +91,7 @@ def analyze_movie_data(input_file):
     # Chart 6: Production countries pie chart
     all_countries = set()
     for item in df['production_countries']:
-        countries = eval(item)
+        countries = ast.literal_eval(item)
         for c in countries:
             all_countries.add(c['name'])
     all_countries = list(all_countries)

@@ -19,7 +19,7 @@ This project offers a comprehensive solution for collecting, cleaning, processin
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/movie-data-analysis.git
+   git clone https://github.com/monodara/movie-data-analysis.git
    cd movie-data-analysis
    ```
 
